@@ -35,8 +35,9 @@ RUN set -eux; \
 RUN pnpm install --no-frozen-lockfile
 RUN pnpm build
 ENV OPENCLAW_PREFER_PNPM=1
-RUN pnpm ui:install && pnpm ui:build
 
+# Build OpenClaw UI
+RUN pnpm ui:install && pnpm ui:build
 
 # Runtime image
 FROM node:22-bookworm
@@ -88,4 +89,5 @@ COPY src ./src
 
 ENV PORT=8080
 EXPOSE 8080
+
 CMD ["node", "src/server.js"]
