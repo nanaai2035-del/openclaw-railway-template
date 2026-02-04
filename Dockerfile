@@ -35,8 +35,13 @@ RUN set -eux; \
 RUN pnpm install --no-frozen-lockfile
 RUN pnpm build
 ENV OPENCLAW_PREFER_PNPM=1
-RUN pnpm ui:install && pnpm ui:build
 
+# Build OpenClaw UI - THIS IS CRITICAL
+RUN pnpm ui:install
+RUN pnpm ui:build
+
+# Verify UI was built
+RUN ls -la /openclaw/ui/dist || echo "WARNING: UI dist not found"
 
 # Runtime image
 FROM node:22-bookworm
@@ -59,7 +64,6 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Install Homebrew (must run as non-root user)
-# Create a user for Homebrew installation, install it, then make it accessible to all users
 RUN useradd -m -s /bin/bash linuxbrew \
   && echo 'linuxbrew ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
@@ -77,15 +81,18 @@ RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --prod --frozen-lockfile && pnpm store prune
 
-# Copy built openclaw
+# Copy built openclaw INCLUDING UI
 COPY --from=openclaw-build /openclaw /openclaw
 
-# Provide a openclaw executable
+# Provide openclaw executable
 RUN printf '%s\n' '#!/usr/bin/env bash' 'exec node /openclaw/dist/entry.js "$@"' > /usr/local/bin/openclaw \
   && chmod +x /usr/local/bin/openclaw
 
 COPY src ./src
 
 ENV PORT=8080
+ENV OPENCLAW_PREFER_PNPM=1
+
 EXPOSE 8080
+
 CMD ["node", "src/server.js"]
