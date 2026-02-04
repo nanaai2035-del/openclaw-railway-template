@@ -95,4 +95,4 @@ ENV OPENCLAW_PREFER_PNPM=1
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "mkdir -p /data/.openclaw && test -f /data/.openclaw/openclaw.json || echo '{\"gateway\":{\"mode\":\"local\"}}' > /data/.openclaw/openclaw.json; node src/server.js"]
+CMD ["node", "src/server.js", "--allow-unconfigured"]
