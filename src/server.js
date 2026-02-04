@@ -149,6 +149,10 @@ async function startGateway() {
   console.log(`[gateway] ========== GATEWAY START TOKEN SYNC ==========`);
   console.log(`[gateway] Syncing wrapper token to config: ${OPENCLAW_GATEWAY_TOKEN.slice(0, 16)}... (len: ${OPENCLAW_GATEWAY_TOKEN.length})`);
 
+    // Set gateway.mode=local to fix "Gateway start blocked" error
+    console.log(`[gateway] Setting gateway.mode=local...`);
+    await runCmd(OPENCLAW_NODE, clawArgs(["config", "set", "gateway.mode", "local"]));
+  
   const syncResult = await runCmd(
     OPENCLAW_NODE,
     clawArgs(["config", "set", "gateway.auth.token", OPENCLAW_GATEWAY_TOKEN]),
